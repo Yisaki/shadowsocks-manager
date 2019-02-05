@@ -9,6 +9,14 @@ app
     });
     $http.get('/api/admin/order').then(success => {
       $scope.orders = success.data;
+      $scope.groupOrders = [];
+      $scope.orders.forEach(order => {
+        if(!order.baseId) {
+          $scope.groupOrders.push([order]);
+        } else {
+          $scope.groupOrders[$scope.groupOrders.length - 1].push(order);
+        }
+      });
     });
     $scope.editOrder = id => {
       $state.go('admin.editOrder', { id });
@@ -16,6 +24,14 @@ app
     $scope.setFabButton(() => {
       $state.go('admin.newOrder');
     });
+    $scope.orderColor = order => {
+      if(order.baseId) {
+        return {
+          background: 'blue-50', 'border-color': 'blue-300',
+        };
+      }
+      return {};
+    };
   }
 ])
 .controller('AdminNewOrderController', ['$scope', '$state', '$http', '$filter',
@@ -44,6 +60,7 @@ app
       multiServerFlow: 0,
       changeOrderType: 1,
       server: null,
+      active: 1,
     };
     $http.get('/api/admin/server').then(success => {
       $scope.servers = success.data;
@@ -90,6 +107,7 @@ app
           multiServerFlow: $scope.order.multiServerFlow,
           changeOrderType: $scope.order.changeOrderType,
           server: $scope.order.server,
+          active: $scope.order.active,
         }).then(success => {
           $state.go('admin.order');
         });
@@ -211,6 +229,7 @@ app
           changeOrderType: $scope.order.changeOrderType,
           server: $scope.order.server,
           changeCurrentAccount: $scope.changeCurrentAccount,
+          active: $scope.order.active,
         }).then(success => {
           $state.go('admin.order');
         });
